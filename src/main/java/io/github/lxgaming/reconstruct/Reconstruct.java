@@ -82,11 +82,12 @@ public class Reconstruct {
             Configurator.setLevel(getLogger().getName(), Level.INFO);
             getLogger().info("Debug mode disabled.");
         }
-        
+        /* Removing this as its blocked when no console is present
         if (System.console() == null && !System.getProperty("java.class.path").contains("idea_rt.jar")) {
             getLogger().error("Failed to detect Console");
             return;
         }
+         */
         
         if (arguments.getJarPath() == null || arguments.getMappingPath() == null || arguments.getOutputPath() == null) {
             getLogger().error("Invalid arguments");
