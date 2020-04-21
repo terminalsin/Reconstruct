@@ -16,6 +16,7 @@
 
 package io.github.lxgaming.reconstruct;
 
+import com.shanebeestudios.mcdeop.app.App;
 import io.github.lxgaming.reconstruct.bytecode.Attribute;
 import io.github.lxgaming.reconstruct.bytecode.Attributes;
 import io.github.lxgaming.reconstruct.bytecode.RcClass;
@@ -56,12 +57,18 @@ import java.util.zip.ZipOutputStream;
 public class Reconstruct {
     
     private static Reconstruct instance;
+    private final App app;
     private final Logger logger;
     private final Arguments arguments;
     private final Set<RcClass> classes;
-    
+
     public Reconstruct() {
+        this(null);
+    }
+
+    public Reconstruct(App app) {
         instance = this;
+        this.app = app;
         this.logger = LogManager.getLogger(Reference.NAME);
         this.arguments = new Arguments();
         this.classes = Toolbox.newHashSet();
@@ -132,6 +139,7 @@ public class Reconstruct {
                     String name = Toolbox.fromFileName(jarEntry.getName());
                     if (StringUtils.startsWith(getArguments().getExcludedPackages(), name)) {
                         getLogger().debug("Skipping {}", name);
+                        updateApp("Skipping " + name);
                         continue;
                     }
                     
@@ -142,6 +150,7 @@ public class Reconstruct {
                     RcClass rcClass = getClass(className, Attributes.OBFUSCATED_NAME).orElseGet(() -> getClass(className).orElse(null));
                     if (rcClass == null) {
                         getLogger().warn("Missing {}", className);
+                        updateApp("Missing " + className);
                         continue;
                     }
                     
@@ -165,6 +174,7 @@ public class Reconstruct {
             }
             
             getLogger().info("Linked {} classes", getClasses().size());
+            updateApp("Linked " + getClasses().size() + " classes");
             return true;
         } catch (Exception ex) {
             Reconstruct.getInstance().getLogger().error("Encountered an error while preparing", ex);
@@ -209,6 +219,7 @@ public class Reconstruct {
                         String name = Toolbox.fromFileName(jarEntry.getName());
                         if (StringUtils.startsWith(getArguments().getExcludedPackages(), name)) {
                             getLogger().debug("Skipping {}", name);
+                            updateApp("Skipping " + name);
                             writeZipEntry(inputStream, outputStream, jarEntry);
                             continue;
                         }
@@ -225,6 +236,7 @@ public class Reconstruct {
                         }
                         
                         getLogger().info("Transformed {} -> {}", name, transform.getClassName());
+                        updateApp("Transformed " + name + " -> " + transform.getClassName());
                         writeZipEntry(transform.getClassWriter().toByteArray(), outputStream, Toolbox.toFileName(transform.getClassName()));
                     }
                 }
@@ -316,5 +328,11 @@ public class Reconstruct {
     
     public Set<RcClass> getClasses() {
         return classes;
+    }
+
+    private void updateApp(String message) {
+        if (app != null) {
+            app.updateStatusBox(message);
+        }
     }
 }

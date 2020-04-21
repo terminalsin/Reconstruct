@@ -9,7 +9,7 @@ targetCompatibility = 1.8
 
 group = "io.github.lxgaming"
 archivesBaseName = "Reconstruct"
-version = "1.0.1"
+version = "1.0.2"
 
 configurations {
     provided {
@@ -23,6 +23,7 @@ configurations {
 
 repositories {
     jcenter()
+    mavenLocal()
 }
 
 dependencies {
@@ -34,6 +35,8 @@ dependencies {
     compile("org.fusesource.jansi:jansi:1.18")
     testCompile("org.junit.jupiter:junit-jupiter-engine:5.5.2")
     compile("org.ow2.asm:asm-commons:7.1")
+    implementation 'com.shanebeestudios:McDeob:1.0.4'
+
 }
 
 jar {
