@@ -9,7 +9,7 @@ targetCompatibility = 1.8
 
 group = "io.github.lxgaming"
 archivesBaseName = "Reconstruct"
-version = "1.0.2"
+version = "1.0.3"
 
 configurations {
     provided {
