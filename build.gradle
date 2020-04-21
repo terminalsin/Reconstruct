@@ -23,7 +23,7 @@ configurations {
 
 repositories {
     jcenter()
-    mavenLocal()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -35,7 +35,7 @@ dependencies {
     compile("org.fusesource.jansi:jansi:1.18")
     testCompile("org.junit.jupiter:junit-jupiter-engine:5.5.2")
     compile("org.ow2.asm:asm-commons:7.1")
-    implementation 'com.shanebeestudios:McDeob:1.0.4'
+    implementation 'com.github.ShaneBeeStudios:McDeob:1.0.5'
 
 }
 
