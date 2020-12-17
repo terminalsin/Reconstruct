@@ -27,7 +27,11 @@ import java.util.Set;
 
 public final class TransformerManager {
     
-    private static final Set<Transformer> TRANSFORMERS = Toolbox.newLinkedHashSet();
+    private static Set<Transformer> TRANSFORMERS = Toolbox.newLinkedHashSet();
+
+    public static void reset() {
+        TRANSFORMERS = Toolbox.newLinkedHashSet();
+    }
     
     public static boolean process(Transform transform) {
         String className = transform.getClassName();
@@ -58,7 +62,7 @@ public final class TransformerManager {
     public static boolean registerTransformer(Transformer transformer) {
         if (contains(transformer.getClass())) {
             Reconstruct.getInstance().getLogger().warn("{} has already been registered", transformer.getClass().getSimpleName());
-            return true;
+            return false;
         }
         
         if (!transformer.prepare()) {
