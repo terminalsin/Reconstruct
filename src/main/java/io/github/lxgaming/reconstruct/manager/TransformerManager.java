@@ -58,7 +58,7 @@ public final class TransformerManager {
     public static boolean registerTransformer(Transformer transformer) {
         if (contains(transformer.getClass())) {
             Reconstruct.getInstance().getLogger().warn("{} has already been registered", transformer.getClass().getSimpleName());
-            return false;
+            return true;
         }
         
         if (!transformer.prepare()) {
