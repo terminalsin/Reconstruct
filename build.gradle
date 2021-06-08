@@ -8,9 +8,9 @@ subprojects {
     apply plugin: "maven-publish"
     apply plugin: "signing"
 
-group = "io.github.lxgaming"
-archivesBaseName = "Reconstruct"
-version = "1.0.5"
+    group = "io.github.lxgaming"
+    archivesBaseName = "Reconstruct"
+    version = "1.0.5"
 
     repositories {
         mavenCentral()
@@ -20,90 +20,91 @@ version = "1.0.5"
         testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
     }
 
-repositories {
-    jcenter()
-    maven { url 'https://jitpack.io' }
-}
-
-dependencies {
-    compile("com.beust:jcommander:1.78")
-    compile("net.sf.proguard:proguard-base:6.1.1")
-    annotationProcessor("org.apache.logging.log4j:log4j-core:2.12.1")
-    compile("org.apache.logging.log4j:log4j-core:2.12.1")
-    compile("org.apache.logging.log4j:log4j-slf4j-impl:2.12.1")
-    compile("org.fusesource.jansi:jansi:1.18")
-    testCompile("org.junit.jupiter:junit-jupiter-engine:5.5.2")
-    compile("org.ow2.asm:asm-commons:7.1")
-    implementation 'com.github.ShaneBeeStudios:McDeob:1.0.5'
-
-}
-
-jar {
-    manifest {
-        attributes("Main-Class": "io.github.lxgaming.reconstruct.Main")
+    repositories {
+        jcenter()
+        maven { url 'https://jitpack.io' }
     }
 
-    javadoc {
-        failOnError = false
+    dependencies {
+        compile("com.beust:jcommander:1.78")
+        compile("net.sf.proguard:proguard-base:6.1.1")
+        annotationProcessor("org.apache.logging.log4j:log4j-core:2.12.1")
+        compile("org.apache.logging.log4j:log4j-core:2.12.1")
+        compile("org.apache.logging.log4j:log4j-slf4j-impl:2.12.1")
+        compile("org.fusesource.jansi:jansi:1.18")
+        testCompile("org.junit.jupiter:junit-jupiter-engine:5.5.2")
+        compile("org.ow2.asm:asm-commons:7.1")
+        implementation 'com.github.ShaneBeeStudios:McDeob:1.0.5'
+
     }
 
-    publishing {
-        publications {
-            mavenPublication(MavenPublication) {
-                groupId group
-                artifactId archivesBaseName
-                version version
-                pom {
-                    name = "Reconstruct"
-                    description = "ProGuard Deobfuscator"
-                    url = "https://github.com/LXGaming/Reconstruct"
-                    developers {
-                        developer {
-                            id = "lxgaming"
-                            name = "LXGaming"
-                        }
-                    }
-                    issueManagement {
-                        system = "GitHub Issues"
-                        url = "https://github.com/LXGaming/Reconstruct/issues"
-                    }
-                    licenses {
-                        license {
-                            name = "The Apache License, Version 2.0"
-                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                        }
-                    }
-                    scm {
-                        connection = "scm:git@github.com:LXGaming/Reconstruct.git"
-                        developerConnection = "scm:git@github.com:LXGaming/Reconstruct.git"
+    jar {
+        manifest {
+            attributes("Main-Class": "io.github.lxgaming.reconstruct.Main")
+        }
+
+        javadoc {
+            failOnError = false
+        }
+
+        publishing {
+            publications {
+                mavenPublication(MavenPublication) {
+                    groupId group
+                    artifactId archivesBaseName
+                    version version
+                    pom {
+                        name = "Reconstruct"
+                        description = "ProGuard Deobfuscator"
                         url = "https://github.com/LXGaming/Reconstruct"
+                        developers {
+                            developer {
+                                id = "lxgaming"
+                                name = "LXGaming"
+                            }
+                        }
+                        issueManagement {
+                            system = "GitHub Issues"
+                            url = "https://github.com/LXGaming/Reconstruct/issues"
+                        }
+                        licenses {
+                            license {
+                                name = "The Apache License, Version 2.0"
+                                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                            }
+                        }
+                        scm {
+                            connection = "scm:git@github.com:LXGaming/Reconstruct.git"
+                            developerConnection = "scm:git@github.com:LXGaming/Reconstruct.git"
+                            url = "https://github.com/LXGaming/Reconstruct"
+                        }
+                    }
+                }
+            }
+            repositories {
+                if (project.hasProperty("sonatype.username") && project.hasProperty("sonatype.password")) {
+                    maven {
+                        name = "sonatype"
+                        url = version.contains("-SNAPSHOT") ? "https://oss.sonatype.org/content/repositories/snapshots" : "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+                        credentials {
+                            username project.property("sonatype.username")
+                            password project.property("sonatype.password")
+                        }
                     }
                 }
             }
         }
-        repositories {
-            if (project.hasProperty("sonatype.username") && project.hasProperty("sonatype.password")) {
-                maven {
-                    name = "sonatype"
-                    url = version.contains("-SNAPSHOT") ? "https://oss.sonatype.org/content/repositories/snapshots" : "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-                    credentials {
-                        username project.property("sonatype.username")
-                        password project.property("sonatype.password")
-                    }
-                }
+
+        signing {
+            sign publishing.publications
+        }
+
+        test {
+            testLogging {
+                exceptionFormat = "full"
             }
+
+            useJUnitPlatform()
         }
-    }
-
-    signing {
-        sign publishing.publications
-    }
-
-    test {
-        testLogging {
-            exceptionFormat = "full"
-        }
-
-        useJUnitPlatform()
     }
 }
