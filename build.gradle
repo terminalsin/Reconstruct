@@ -1,25 +1,24 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "4.0.4"
-    id "java"
-    id "signing"
+    id "com.github.johnrengelman.shadow" version "6.1.0" apply false
+    id "net.kyori.blossom" version "1.2.0" apply false
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+subprojects {
+    apply plugin: "java"
+    apply plugin: "maven-publish"
+    apply plugin: "signing"
 
 group = "io.github.lxgaming"
 archivesBaseName = "Reconstruct"
 version = "1.0.5"
 
-configurations {
-    provided {
-        compile.extendsFrom(provided)
+    repositories {
+        mavenCentral()
     }
 
-    build.dependsOn("signJar")
-    jar.enabled = false
-    jar.dependsOn("shadowJar")
-}
+    dependencies {
+        testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    }
 
 repositories {
     jcenter()
@@ -44,76 +43,67 @@ jar {
         attributes("Main-Class": "io.github.lxgaming.reconstruct.Main")
     }
 
-    from {
-        (configurations.compile - configurations.provided).findAll({
-            it.isDirectory() || it.name.endsWith(".jar")
-        }).collect({
-            it.isDirectory() ? it : zipTree(it)
-        })
+    javadoc {
+        failOnError = false
     }
-}
 
-processResources {
-    from("LICENSE")
-    rename("LICENSE", "LICENSE-" + archivesBaseName)
-}
-
-shadowJar {
-    classifier = null
-    configurations = [project.configurations.compile]
-
-    exclude {
-        // Exclude the Log4j2Plugins.dat file so logging works. Log4j2PluginsCacheFileTransformer doesn't work.
-        if (it.path.equals("META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat")) {
-            return true
+    publishing {
+        publications {
+            mavenPublication(MavenPublication) {
+                groupId group
+                artifactId archivesBaseName
+                version version
+                pom {
+                    name = "Reconstruct"
+                    description = "ProGuard Deobfuscator"
+                    url = "https://github.com/LXGaming/Reconstruct"
+                    developers {
+                        developer {
+                            id = "lxgaming"
+                            name = "LXGaming"
+                        }
+                    }
+                    issueManagement {
+                        system = "GitHub Issues"
+                        url = "https://github.com/LXGaming/Reconstruct/issues"
+                    }
+                    licenses {
+                        license {
+                            name = "The Apache License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    scm {
+                        connection = "scm:git@github.com:LXGaming/Reconstruct.git"
+                        developerConnection = "scm:git@github.com:LXGaming/Reconstruct.git"
+                        url = "https://github.com/LXGaming/Reconstruct"
+                    }
+                }
+            }
         }
-
-        // Exclude all ProGuard class files except the MappingProcessor & MappingReader
-        if (it.name.endsWith(".class") && it.path.startsWith("proguard/")) {
-            return !(it.path.equals("proguard/obfuscate/MappingProcessor.class") || it.path.equals("proguard/obfuscate/MappingReader.class"))
-        }
-
-        return false
-    }
-}
-
-test {
-    testLogging {
-        exceptionFormat = "full"
-        showStandardStreams = true
-    }
-    
-    useJUnitPlatform()
-}
-
-task signJar {
-    doFirst {
-        if (!project.hasProperty("signing.keyStorePath") || !project.hasProperty("signing.secretKeyRingFile")) {
-            project.logger.warn("========== [WARNING] ==========")
-            project.logger.warn("")
-            project.logger.warn("   This build is not signed!   ")
-            project.logger.warn("")
-            project.logger.warn("========== [WARNING] ==========")
-            throw new StopExecutionException()
+        repositories {
+            if (project.hasProperty("sonatype.username") && project.hasProperty("sonatype.password")) {
+                maven {
+                    name = "sonatype"
+                    url = version.contains("-SNAPSHOT") ? "https://oss.sonatype.org/content/repositories/snapshots" : "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+                    credentials {
+                        username project.property("sonatype.username")
+                        password project.property("sonatype.password")
+                    }
+                }
+            }
         }
     }
 
-    doLast {
-        configurations.archives.allArtifacts.files.each {
-            ant.signjar(
-                jar: it,
-                alias: project.property("signing.alias"),
-                storepass: project.property("signing.keyStorePassword"),
-                keystore: project.property("signing.keyStorePath"),
-                keypass: project.property("signing.keyStorePassword"),
-                preservelastmodified: project.property("signing.preserveLastModified"),
-                tsaurl: project.property("signing.timestampAuthority"),
-                digestalg: project.property("signing.digestAlgorithm")
-            )
-            project.logger.lifecycle("JAR Signed: " + it.name)
+    signing {
+        sign publishing.publications
+    }
 
-            signing.sign(it)
-            project.logger.lifecycle("PGP Signed: " + it.name)
+    test {
+        testLogging {
+            exceptionFormat = "full"
         }
+
+        useJUnitPlatform()
     }
 }
